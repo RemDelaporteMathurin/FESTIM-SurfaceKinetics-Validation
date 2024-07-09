@@ -10,7 +10,7 @@ import numpy as np
 # Create the FESTIM model
 my_model = F.Simulation()
 
-my_model.mesh = F.MeshFromVertices(np.linspace(0,1,100))
+my_model.mesh = F.MeshFromVertices(np.linspace(0, 1, 100))
 
 # Variational formulation
 n_IS = 20
@@ -40,26 +40,25 @@ my_model.boundary_conditions = [
         J_vs=n_surf * 2 / n_IS + 2 * lambda_IS - D,
         surfaces=1,
         initial_condition=exact_solution_cs(t=0),
-        t = F.t
+        t=F.t,
     ),
 ]
 
-my_model.initial_conditions = [F.InitialCondition(field="solute", value=exact_solution_cm(x=F.x, t=0))]
+my_model.initial_conditions = [
+    F.InitialCondition(field="solute", value=exact_solution_cm(x=F.x, t=0))
+]
 
 my_model.materials = F.Material(id=1, D_0=D, E_D=0)
 
 my_model.T = 300
 
 my_model.settings = F.Settings(
-    absolute_tolerance=1e-10,
-    relative_tolerance=1e-10,
-    transient=True,
-    final_time=5
+    absolute_tolerance=1e-10, relative_tolerance=1e-10, transient=True, final_time=5
 )
 
 my_model.dt = F.Stepsize(0.01)
 
-export_times = [1,3,5]
+export_times = [1, 3, 5]
 my_model.exports = [
     F.TXTExport("solute", filename="./mobile_conc.txt", times=export_times),
     F.DerivedQuantities([F.AdsorbedHydrogen(surface=1)]),

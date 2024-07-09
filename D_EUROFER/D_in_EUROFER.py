@@ -64,6 +64,7 @@ R = 4.09e-10  # implantation range, m
 sigma = 1 / np.sqrt(2 * 6.25e6) * 1e-6
 r = 0.5  # reflection coefficient
 
+
 ################### FUNCTIONS ###################
 def Xi(T):
     # unitless
@@ -108,7 +109,10 @@ def k_sb(T, surf_conc, t):
 
 
 def norm_flux(X, sigma):
-    return 2 / (special.erf((0.8e-3 - X) / np.sqrt(2) / sigma)+ special.erf((X) / np.sqrt(2) / sigma))
+    return 2 / (
+        special.erf((0.8e-3 - X) / np.sqrt(2) / sigma)
+        + special.erf((X) / np.sqrt(2) / sigma)
+    )
 
 
 ################### MODEL ###################
@@ -137,7 +141,7 @@ surf_conc1 = F.SurfaceKinetics(
     n_surf=n_surf,
     n_IS=n_IS,
     J_vs=J_vs,
-    surfaces=[1,2],
+    surfaces=[1, 2],
     initial_condition=0,
     t=F.t,
 )
@@ -154,15 +158,15 @@ traps = F.Traps(
             density=1e-5 * rho_EFe,
             materials=EFe,
         ),
-         #F.Trap(
-         #   k_0=nu_tr / n_IS,
-         #   E_k=E_tr,
-         #   p_0=nu_dt,
-         #   E_p=E_dt_dpa,
-            #density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3e-6), (0, True)),
-         #   density=0.25e-3 * rho_EFe * (1/(1 + sp.exp((F.x-3e-6)*5e6))),
-         #   materials=EFe,
-         #),
+        # F.Trap(
+        #   k_0=nu_tr / n_IS,
+        #   E_k=E_tr,
+        #   p_0=nu_dt,
+        #   E_p=E_dt_dpa,
+        # density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3e-6), (0, True)),
+        #   density=0.25e-3 * rho_EFe * (1/(1 + sp.exp((F.x-3e-6)*5e6))),
+        #   materials=EFe,
+        # ),
     ]
 )
 EFe_model.traps = traps
@@ -220,7 +224,7 @@ EFe_model.settings = F.Settings(
 
 # Exports
 results_folder = "./results/"
-'''
+"""
 XDMF = [
     F.XDMFExport(
         field="solute",
@@ -246,7 +250,7 @@ XDMF = [
         checkpoint=False,  # needed in 1D
         mode=10,
     ),
-]'''
+]"""
 
 derived_quantities = [
     F.DerivedQuantities(
@@ -294,29 +298,29 @@ ax4 = fig.add_subplot(gs[:, 1:])
 
 ax4.plot(
     T_storage + (results["t(s)"] - t_load - t_cool - t_storage) * ramp,
-    (results["Flux1"] / 1e12/1e5),
+    (results["Flux1"] / 1e12 / 1e5),
     label="Flux_left",
 )
 # ax3.plot(T_storage + (results["t(s)"]-t_load-t_cool-t_storage)*ramp, (-results["Flux surface 1: solute"]/1e12), ls='dashed')
 ax4.plot(
     T_storage + (results["t(s)"] - t_load - t_cool - t_storage) * ramp,
-    (results["Flux2"] / 1e12/1e5),
+    (results["Flux2"] / 1e12 / 1e5),
     label="Flux_right",
 )
 ax4.plot(
     T_storage + (results["t(s)"] - t_load - t_cool - t_storage) * ramp,
-    ((results["Flux2"] + results["Flux1"]) / 1e12/1e5),
+    ((results["Flux2"] + results["Flux1"]) / 1e12 / 1e5),
     label="Total",
 )
 
 ax4.scatter(
-    exp[0], exp[1]/1e5, marker="x", s=75, linewidths=1.2, label="exp.: 143h plasma"
+    exp[0], exp[1] / 1e5, marker="x", s=75, linewidths=1.2, label="exp.: 143h plasma"
 )
 ax4.legend()
 
 ax4.set_xlim(300, 800)
 ax4.set_ylim(0, 1.5)
-#ax4.set_yscale('log')
+# ax4.set_yscale('log')
 ax4.set_xlabel("T, K")
 ax4.set_ylabel(r"Flux, $10^5$ $\mu$m$^{-2}$s$^{-1}$")
 
