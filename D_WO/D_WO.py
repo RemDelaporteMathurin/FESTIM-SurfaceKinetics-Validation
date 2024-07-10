@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sympy as sp
 import warnings
+from scipy import interpolate
 
 global n_surf
 
@@ -49,7 +50,9 @@ fits = {
     "beta": [8.902, 7.240, 4.144],
 }
 ################### FUNCTIONS ###################
-
+def norm(x, c_comp, c_ex):
+    #return np.sqrt(np.trapz(y=(c_comp-c_ex)**2, x=x))
+    return max(np.abs(c_comp-c_ex)/c_comp * 100)
 
 ################### MODEL ###################
 colors = ["tab:blue", "tab:red", "tab:green"]
@@ -114,28 +117,6 @@ for i in range(3):
     tungsten = F.Material(id=1, D_0=D0, E_D=E_diff)
     W_model.materials = tungsten
 
-    traps = F.Traps(
-        [
-            F.Trap(
-                k_0=nu0 / n_IS,
-                E_k=E_diff,
-                p_0=nu0,
-                E_p=0.912,
-                density=7.7e-6,
-                materials=tungsten,
-            ),
-            F.Trap(
-                k_0=nu0 / n_IS,
-                E_k=E_diff,
-                p_0=nu0,
-                E_p=1.176,
-                density=7.9e-7,
-                materials=tungsten,
-            ),
-        ]
-    )
-    W_model.traps = traps
-
     W_model.T = F.Temperature(
         value=sp.Piecewise(
             (T0, F.t < t_imp + t_storage), (T0 + ramp * (F.t - t_imp - t_storage), True)
@@ -159,13 +140,13 @@ for i in range(3):
     W_model.dt = F.Stepsize(
         initial_value=1e-7,
         stepsize_change_ratio=1.25,
-        max_stepsize=lambda t: 10 if t < t_imp + t_storage - 10 else 0.5,
+        max_stepsize=lambda t: 10 if t < t_imp + t_storage + 1 else 0.05,
         dt_min=1e-9,
     )
 
     W_model.settings = F.Settings(
-        absolute_tolerance=1e8,
-        relative_tolerance=1e-7,
+        absolute_tolerance=1e5,
+        relative_tolerance=1e-11,
         maximum_iterations=50,
         final_time=t_imp + t_storage + t_TDS,
     )
@@ -196,9 +177,12 @@ for i in range(3):
             * np.exp(-E_des(surf_conc) / F.k_B / T)
         )
 
+    T_data = results["Total T surface 1"][results["t(s)"] >= t_imp + t_storage]
+    Flux_data = results["Flux"][results["t(s)"] >= t_imp + t_storage]
+
     plt.plot(
-        results["Total T surface 1"][results["t(s)"] >= t_imp + t_storage],
-        results["Flux"][results["t(s)"] >= t_imp + t_storage],
+        T_data,
+        Flux_data,
         linewidth=3,
         label="FESTIM: " + labels[i],
     )
@@ -209,6 +193,21 @@ for i in range(3):
     plt.scatter(
         exp[0], exp[1], marker="x", s=75, linewidths=1.2, label="exp. " + labels[i]
     )
+
+    MHIMS = pd.read_csv(
+        f"./MHIMS_data/" + names[i] + "ML_MHIMS.txt", header=None, skiprows=1, sep="\s+"
+    )
+
+    plt.plot(
+        MHIMS[0], MHIMS[1], ls = 'dashed', linewidth=1.2, label="MHIMS. " + labels[i]
+    )
+
+    MHIMS_interp = interpolate.interp1d(MHIMS[0], MHIMS[1])
+
+        
+    print(f"L2 error {names[i]}: {norm(T_data, MHIMS_interp(T_data), Flux_data)}")
+
+
 
 plt.ylabel(r"Desorption flux (m$^{-2}$ s$^{-1}$)")
 plt.xlabel(r"Temperature (K)")

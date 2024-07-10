@@ -1,0 +1,14 @@
+name: festim-surface-kinetics-vv-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - fenics
+  - matplotlib=3.8.3
+  - numpy<1.25
+  - scipy==1.12.0
+  - sympy
+  - scipy
+  - pandas
+  - pip:
+    - git+https://github.com/festim-dev/FESTIM.git@02f79ade39ce5b7b6168d9b8f65fa49de55db74e
