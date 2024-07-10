@@ -307,11 +307,11 @@ ax4.plot(
     (results["Flux2"] / 1e12 / 1e5),
     label="Flux_right",
 )
-ax4.plot(
+'''ax4.plot(
     T_storage + (results["t(s)"] - t_load - t_cool - t_storage) * ramp,
     ((results["Flux2"] + results["Flux1"]) / 1e12 / 1e5),
     label="Total",
-)
+)'''
 
 ax4.scatter(
     exp[0], exp[1] / 1e5, marker="x", s=75, linewidths=1.2, label="exp.: 143h plasma"
@@ -345,4 +345,5 @@ ax3.set_ylabel(r"D surface concentration, m$^{-2}$")
 ax3.set_xlabel("t, h")
 
 plt.tight_layout()
+plt.savefig('Figure_1.png')
 plt.show()

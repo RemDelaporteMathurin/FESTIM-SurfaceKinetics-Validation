@@ -18,7 +18,7 @@ Gamma_atom = 5.4e18  # the flux of D atoms, m-2 s-1
 phi_W = 9.7e13  # the flux of W ions, m-2 s-1
 
 T_storage = 300  # storage temperature, K
-t_storage = 10000  # storage time?, s
+t_storage = 20000  # storage time?, s
 
 T_stop_D = [
     420,
@@ -132,8 +132,8 @@ for i in range(1):
     # Mesh
     vertices = np.concatenate(
         [
-            np.linspace(0, 2e-8, num=201),
-            np.linspace(2e-8, 3e-6, num=300),
+            np.linspace(0, 2e-8, num=101),
+            np.linspace(2e-8, 3e-6, num=200),
             np.linspace(3e-6, L, num=200),
         ]
     )
@@ -245,37 +245,42 @@ for i in range(1):
         if t < t_exposure:
             return 100
         elif (
-            t > t_exposure + t_cool[i] + t_storage - 50
+            t > t_exposure + t_cool[i] + t_storage
             and t < t_exposure + t_cool[i] + t_storage + t_add
         ):
             return 100
         elif t > t_exposure + t_cool[i] + t_cool[1] + t_add + 2 * t_storage:
             return 30
         else:
-            return 250
+            return 200
 
     W_model.dt = F.Stepsize(
         initial_value=1e-4,
-        stepsize_change_ratio=1.5,
+        stepsize_change_ratio=1.1,
         max_stepsize=dt,
         dt_min=1e-6,
         milestones=[
-            t_exposure + t_cool[i] + t_storage,
-            t_exposure + t_cool[i] + 2 * t_storage + t_add + t_cool[1],
-        ],
+            t_exposure,
+            t_exposure+t_cool[i],
+            t_exposure+t_cool[i]+t_storage,
+            t_exposure+t_cool[i]+t_storage+t_add,
+            t_exposure+t_cool[i]+t_storage+t_add+t_cool[1],
+            t_exposure+t_cool[i]+2*t_storage+t_add+t_cool[1],
+            t_exposure+t_cool[i]+2*t_storage+t_add+t_cool[1]+t_TDS,
+        ]
     )
 
     W_model.settings = F.Settings(
-        absolute_tolerance=1e12,
-        relative_tolerance=1e-10,
+        absolute_tolerance=1e10,
+        relative_tolerance=1e-8,
         maximum_iterations=50,
         final_time=t_exposure
         + t_cool[i]
         + 2 * t_storage
         + t_heat_add
         + t_add
-        + t_cool[1]
-        + t_TDS,
+        + t_cool[1]+
+        t_TDS
     )
 
     # Exports
@@ -321,23 +326,16 @@ for i in range(1):
             * f.exp(-2 * E_des(surf_conc2) / F.k_B / T)
         )
 
-    plt.plot(
-        T_storage
-        + ramp
-        * (
-            results["t(s)"]
-            - (t_exposure + t_cool[i] + 2 * t_storage + t_cool[1] + t_heat_add + t_add)
-        ),
-        results["Flux1"],
-        label=f"Texposure={T_exposure[i]}",
-    )
-    # plt.plot(results["t(s)"],  results["Total 1 volume 1"],label = f'1')
+    plt.plot(T_storage + ramp * (results["t(s)"]-(t_exposure+t_cool[i]+2*t_storage+t_add+t_cool[1])),  
+             results["Flux1"],label = f'450 K', color = 'black')
+    #plt.plot(results["t(s)"],  results["Total retention volume 1"],label = f'1')
     # plt.plot(results["t(s)"],  results["Total 2 volume 1"],label = f'2')
     # plt.plot(results["t(s)"],  results["Total 3 volume 1"],label = f'3')
     # plt.plot(results["t(s)"],  results["Total 4 volume 1"],label = f'4')
-
     plt.legend()
-    plt.xlim(500, 1200)
+    plt.xlim(500,1200)
     plt.ylim(0, 2.25e17)
+    plt.ylabel(r"Flux, m$^{-2}$s$^{-1}$")
+    plt.xlabel(r"T")
 
 plt.show()
