@@ -22,16 +22,16 @@ The repository includes several validation cases and one verification test on th
 
 Clone this repository to your local machine.
 
-    ```bash
-    git clone https://github.com/KulaginVladimir/FESTIM-SurfaceKinetics-Validation
-    ```
+```
+git clone https://github.com/KulaginVladimir/FESTIM-SurfaceKinetics-Validation
+```
 
 Create and activate the correct conda environment with the required dependencies:
 
-    ```bash
-    conda env create -f environment.yml
-    conda activate festim-surface-kinetics-vv-env
-    ```
+```
+conda env create -f environment.yml
+conda activate festim-surface-kinetics-vv-env
+```
 
 This will set up a Conda environment named `festim-surface-kinetics-vv-env` with all the required dependencies for running the FESTIM scripts.
 
