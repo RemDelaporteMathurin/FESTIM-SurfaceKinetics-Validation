@@ -20,7 +20,9 @@ The repository includes several validation cases and one verification test on th
 
 ## How to use
 
-Clone this repository to your local machine.
+Jupyter books in the folder can be inspected online with Binder: https://mybinder.org/v2/gh/KulaginVladimir/FESTIM-SurfaceKinetics-Validation/HEAD
+
+For a local use, clone this repository to your local machine.
 
 ```
 git clone https://github.com/KulaginVladimir/FESTIM-SurfaceKinetics-Validation
@@ -35,4 +37,4 @@ conda activate festim-surface-kinetics-vv-env
 
 This will set up a Conda environment named `festim-surface-kinetics-vv-env` with all the required dependencies for running the FESTIM scripts.
 
-Navigate to the desired case folder and execute the Python scripts using the activated Conda environment.
+Navigate to the desired case folder and run the Jupyter books using the activated Conda environment.
