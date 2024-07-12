@@ -49,10 +49,13 @@ fits = {
     "alpha": [0.303, 0.460, 0.437],
     "beta": [8.902, 7.240, 4.144],
 }
+
+
 ################### FUNCTIONS ###################
 def norm(x, c_comp, c_ex):
-    #return np.sqrt(np.trapz(y=(c_comp-c_ex)**2, x=x))
-    return max(np.abs(c_comp-c_ex)/c_comp * 100)
+    # return np.sqrt(np.trapz(y=(c_comp-c_ex)**2, x=x))
+    return max(np.abs(c_comp - c_ex) / c_comp * 100)
+
 
 ################### MODEL ###################
 colors = ["tab:blue", "tab:red", "tab:green"]
@@ -199,14 +202,14 @@ for i in range(3):
     )
 
     plt.plot(
-        MHIMS[0], MHIMS[1], ls = 'dashed', linewidth=1.2, label="MHIMS. " + labels[i]
+        MHIMS[0], MHIMS[1], ls="dashed", linewidth=1.2, label="MHIMS. " + labels[i]
     )
 
     MHIMS_interp = interpolate.interp1d(MHIMS[0], MHIMS[1])
 
-        
-    print(f"L2 error {names[i]}: {norm(T_data, MHIMS_interp(T_data), Flux_data)}")
-
+    print(
+        f"Max. relative error {names[i]}: {norm(T_data, MHIMS_interp(T_data), Flux_data)}%"
+    )
 
 
 plt.ylabel(r"Desorption flux (m$^{-2}$ s$^{-1}$)")

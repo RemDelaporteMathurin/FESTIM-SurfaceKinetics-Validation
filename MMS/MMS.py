@@ -23,14 +23,22 @@ k_sb = 2 * n_IS / n_surf
 solute_source = 2 * (1 - 2 * D)
 
 exact_solution_cm = lambda x, t: 1 + 2 * x**2 + x + 2 * t
-exact_solution_cs = lambda t: n_surf * (1 + 2 * t + 2 * lambda_IS - D) / (2 * n_IS - 1 - 2 * t)
+exact_solution_cs = (
+    lambda t: n_surf * (1 + 2 * t + 2 * lambda_IS - D) / (2 * n_IS - 1 - 2 * t)
+)
 
 solute_source = 2 * (1 - 2 * D)
 
 my_model.sources = [F.Source(solute_source, volume=1, field="solute")]
 
+
 def J_vs(T, surf_conc, t):
-    return 2 * n_surf * (2 * n_IS + 2 * lambda_IS - D) / (2 * n_IS - 1 - 2 * t)**2 + 2 * lambda_IS - D
+    return (
+        2 * n_surf * (2 * n_IS + 2 * lambda_IS - D) / (2 * n_IS - 1 - 2 * t) ** 2
+        + 2 * lambda_IS
+        - D
+    )
+
 
 my_model.boundary_conditions = [
     F.DirichletBC(surfaces=[2], value=exact_solution_cm(x=F.x, t=F.t), field="solute"),
@@ -70,8 +78,10 @@ my_model.exports = [
 my_model.initialise()
 my_model.run()
 
+
 def norm(x, c_comp, c_ex):
-    return np.sqrt(np.trapz(y=(c_comp-c_ex)**2, x=x))
+    return np.sqrt(np.trapz(y=(c_comp - c_ex) ** 2, x=x))
+
 
 data = np.genfromtxt("mobile_conc.txt", names=True, delimiter=",")
 for t in export_times:
@@ -93,7 +103,9 @@ for t in export_times:
         color=l1.get_color(),
     )
 
-    print(f"L2 error for cm at t={t}: {norm(np.array(x), np.array(y), exact_solution_cm(x=np.array(x), t=t))}")
+    print(
+        f"L2 error for cm at t={t}: {norm(np.array(x), np.array(y), exact_solution_cm(x=np.array(x), t=t))}"
+    )
 
 plt.legend(reverse=True)
 plt.ylabel("$c_m$")
