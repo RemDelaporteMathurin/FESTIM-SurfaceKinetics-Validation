@@ -52,10 +52,10 @@ chi0 = 1e-4
 
 # Trap properties
 nu_tr = 8.9e12  # trapping attempt frequency, s^-1
-nu_dt = 2.0e13  # trapping attempt frequency, s^-1
+nu_dt = 2.0e13  # detrapping attempt frequency, s^-1
 E_tr = E_diff
-E_dt_intr = 0.9  # detrapping energy for intrinsic traps, eV
-E_dt_dpa = 1.1  # detrapping energy for DPA traps, eV
+E_dt_intr = 0.85  # detrapping energy for intrinsic traps, eV
+E_dt_dpa = 1.06  # detrapping energy for DPA traps, eV
 
 # Implantation parameters
 Gamma = 9e19  # irradiation flux, m^-2 s^-1
@@ -122,7 +122,7 @@ EFe_model = F.Simulation(log_level=40)
 # Mesh
 vertices = np.concatenate(
     [
-        np.linspace(0, 2e-8, num=101),
+        np.linspace(0, 1e-8, num=101),
         np.linspace(1e-8, 5e-6, num=250),
         np.linspace(5e-6, L, num=500),
     ]
@@ -130,9 +130,7 @@ vertices = np.concatenate(
 
 EFe_model.mesh = F.MeshFromVertices(np.sort(vertices))
 
-# Materials
-EFe = F.Material(id=1, D_0=D0, E_D=E_diff)
-EFe_model.materials = EFe
+EFe_model.materials = [F.Material(id=1, D_0=D0, E_D=E_diff)]
 
 surf_conc1 = F.SurfaceKinetics(
     k_sb=k_sb,
@@ -148,29 +146,28 @@ surf_conc1 = F.SurfaceKinetics(
 
 EFe_model.boundary_conditions = [surf_conc1]
 
-traps = F.Traps(
-    [
-        F.Trap(
-            k_0=nu_tr / n_IS,
-            E_k=E_tr,
-            p_0=nu_dt,
-            E_p=E_dt_intr,
-            density=1e-5 * rho_EFe,
-            materials=EFe,
-        ),
-        # F.Trap(
-        #   k_0=nu_tr / n_IS,
-        #   E_k=E_tr,
-        #   p_0=nu_dt,
-        #   E_p=E_dt_dpa,
-        # density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3e-6), (0, True)),
-        #   density=0.25e-3 * rho_EFe * (1/(1 + sp.exp((F.x-3e-6)*5e6))),
-        #   materials=EFe,
-        # ),
-    ]
+
+trap_intr = F.Trap(
+    k_0=nu_tr/n_IS,
+    E_k=E_tr,
+    p_0=nu_dt,
+    E_p=E_dt_intr,
+    density=1e-5 * rho_EFe,
+    materials=EFe_model.materials[0],
 )
-EFe_model.traps = traps
-# EFe_model.initial_conditions = [F.InitialCondition(field="1", value=1e-5*rho_EFe)]
+trap_dpa = F.Trap(
+    k_0=nu_tr/n_IS,
+    E_k=E_tr,
+    p_0=nu_dt,
+    E_p=E_dt_dpa,
+    #density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3.3e-6), (0, True)),
+    density=0.25e-3 * rho_EFe * (1/(1 + sp.exp((F.x-3e-6)*5e6))),
+    materials=EFe_model.materials[0],
+    )
+
+EFe_model.traps = F.Traps([trap_intr])
+
+#EFe_model.initial_conditions = [F.InitialCondition(field="1", value=1e-5*rho_EFe)]
 
 EFe_model.sources = [
     F.ImplantationFlux(
@@ -196,18 +193,18 @@ EFe_model.T = F.Temperature(
 
 def step_size(t):
     if t <= t_load:
-        return 2.5e3
+        return 500
     elif t > t_load and t <= t_load + t_cool + t_storage:
-        return 0.5e3
+        return 1000
     else:
-        return 30
+        return 25
 
 
 EFe_model.dt = F.Stepsize(
-    initial_value=1e-7,
-    stepsize_change_ratio=1.5,
+    initial_value=1e-4,
+    stepsize_change_ratio=1.1,
     max_stepsize=step_size,
-    dt_min=1e-7,
+    dt_min=1e-5,
     milestones=[
         t_load,
         t_load + t_cool,
@@ -217,7 +214,7 @@ EFe_model.dt = F.Stepsize(
 
 EFe_model.settings = F.Settings(
     absolute_tolerance=1e12,
-    relative_tolerance=1e-10,
+    relative_tolerance=1e-9,
     maximum_iterations=50,
     final_time=t_load + t_cool + t_storage + t_TDS,
 )
@@ -307,14 +304,14 @@ ax4.plot(
     (results["Flux2"] / 1e12 / 1e5),
     label="Flux_right",
 )
-"""ax4.plot(
+ax4.plot(
     T_storage + (results["t(s)"] - t_load - t_cool - t_storage) * ramp,
     ((results["Flux2"] + results["Flux1"]) / 1e12 / 1e5),
     label="Total",
-)"""
+)
 
 ax4.scatter(
-    exp[0], exp[1] / 1e5, marker="x", s=75, linewidths=1.2, label="exp.: 143h plasma"
+    exp[0], exp[1]/ 1e5 , marker="x", s=75, linewidths=1.2, label="exp.: 143h plasma"
 )
 ax4.legend()
 

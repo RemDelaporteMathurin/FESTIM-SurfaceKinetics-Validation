@@ -8,19 +8,17 @@ This repository contains scripts for V&V of surface kinetics model implemented i
 
 The repository includes several validation cases and one verification test on the MMS basis.
 
-[1] H absorption in Ti: [Hamamoto, Y., Uchikoshi, T., & Tanabe, K. (2020). Comprehensive modeling of hydrogen transport and accumulation in titanium and zirconium. Nuclear Materials and Energy, 23, 100751](https://www.sciencedirect.com/science/article/pii/S2352179120300272)
+[1] H absorption in Ti: The case reproduces simulation results of [Y. Hamamoto et al.](https://www.sciencedirect.com/science/article/pii/S2352179120300272) on the H absorption in Ti. The simulations are based on experiments performed by [Y. Harooka et al.](https://www.sciencedirect.com/science/article/abs/pii/0022311581905663?via%3Dihub)
 
-[2] D adsorption on oxidised W: [Hodille, E. A., Pavec, B., Denis, J., Dunand, A., Ferro, Y., Minissale, M., ... & Bisson, R. (2024). Deuterium uptake, desorption and sputtering from W (110) surface covered with oxygen. Nuclear Fusion, 64(4), 046022](https://iopscience.iop.org/article/10.1088/1741-4326/ad2a29/pdf)
+[2] D adsorption on oxidised W: The case reproduces simulation results of [E. A. Hodille et al.](https://iopscience.iop.org/article/10.1088/1741-4326/ad2a29) on the D adsorption/desorption on/from oxidised W. The simulations are based on experiments performed by [A. Dunand et al.](https://iopscience.iop.org/article/10.1088/1741-4326/ac583a)
 
-[3] D implantation in damaged Eurofer: [Schmid, K., Schwarz-Selinger, T., & Theodorou, A. (2023). Modeling intrinsic-and displacement-damage-driven retention in EUROFER. Nuclear Materials and Energy, 36, 101494](https://www.sciencedirect.com/science/article/pii/S2352179123001333)
+[3] D implantation in damaged W: The case reproduces simulation results of [E. A. Hodille et al.](https://iopscience.iop.org/article/10.1088/1741-4326/aa5aa5/meta) The simulations are based on experiments performed by [S. Markelj et al.](https://www.sciencedirect.com/science/article/pii/S0022311515303470?via%3Dihub)
 
-[4] D implantation in damaged W: [Hodille, E. A., Markelj, S., Schwarz-Selinger, T., Založnik, A., Pečovnik, M., Kelemen, M., & Grisolia, C. (2018). Stabilization of defects by the presence of hydrogen in tungsten: simultaneous W-ion damaging and D-atom exposure. Nuclear Fusion, 59(1), 016011](https://iopscience.iop.org/article/10.1088/1741-4326/aaec97)
-
-[5] MMS test
+[4] MMS test
 
 ## How to use
 
-Jupyter books in folders can be inspected online with Binder: https://mybinder.org/v2/gh/KulaginVladimir/FESTIM-SurfaceKinetics-Validation/HEAD
+Jupyter books in folders can be inspected online with Binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/KulaginVladimir/FESTIM-SurfaceKinetics-Validation/HEAD)
 
 For a local use, clone this repository to your local machine.
 

@@ -58,9 +58,10 @@ def norm(x, c_comp, c_ex):
 
 
 ################### MODEL ###################
-colors = ["tab:blue", "tab:red", "tab:green"]
+colors = ["tab:blue", "tab:orange", "tab:green"]
 names = ["000O", "050O", "075O"]
 labels = ["Clean", "0.5ML of O", "0.75ML of O"]
+ls_MHIMS = ["dashed", "dashdot", "dotted"]
 n_surfs = [n_surf, n_surf * (1 - 0.5), n_surf * (1 - 0.75)]
 for i in range(3):
     n_surf = n_surfs[i]
@@ -143,7 +144,7 @@ for i in range(3):
     W_model.dt = F.Stepsize(
         initial_value=1e-7,
         stepsize_change_ratio=1.25,
-        max_stepsize=lambda t: 10 if t < t_imp + t_storage + 1 else 0.05,
+        max_stepsize=lambda t: 5 if t < t_imp + t_storage + 1 else 0.05,
         dt_min=1e-9,
     )
 
@@ -186,7 +187,7 @@ for i in range(3):
     plt.plot(
         T_data,
         Flux_data,
-        linewidth=3,
+        linewidth=2,
         label="FESTIM: " + labels[i],
     )
 
@@ -201,14 +202,14 @@ for i in range(3):
         f"./MHIMS_data/" + names[i] + "ML_MHIMS.txt", header=None, skiprows=1, sep="\s+"
     )
 
-    plt.plot(
-        MHIMS[0], MHIMS[1], ls="dashed", linewidth=1.2, label="MHIMS. " + labels[i]
+    plt.scatter(
+        MHIMS[0][::15], MHIMS[1][::15], marker="o",  label="MHIMS " + labels[i], ec = colors[i], fc = 'none'
     )
 
     MHIMS_interp = interpolate.interp1d(MHIMS[0], MHIMS[1])
 
     print(
-        f"Max. relative error {names[i]}: {norm(T_data, MHIMS_interp(T_data), Flux_data)}%"
+        f"Max. relative error {names[i]}: {norm(T_data, MHIMS_interp(T_data), Flux_data)} %"
     )
 
 
@@ -216,5 +217,4 @@ plt.ylabel(r"Desorption flux (m$^{-2}$ s$^{-1}$)")
 plt.xlabel(r"Temperature (K)")
 plt.legend()
 plt.xlim(300, 800)
-plt.savefig("Comparison.png")
 plt.show()
