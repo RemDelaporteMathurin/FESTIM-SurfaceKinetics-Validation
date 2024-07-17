@@ -14,7 +14,7 @@ The repository includes several validation cases and one verification test on th
 
 [3] [D implantation in damaged W](./D_damagedW): The case reproduces simulation results of [E. A. Hodille et al.](https://iopscience.iop.org/article/10.1088/1741-4326/aa5aa5/meta) The simulations are based on experiments performed by [S. Markelj et al.](https://www.sciencedirect.com/science/article/pii/S0022311515303470?via%3Dihub)
 
-[4] MMS test
+[4] [MMS](./MMS) test
 
 ## How to use
 
