@@ -203,7 +203,12 @@ for i in range(3):
     )
 
     plt.scatter(
-        MHIMS[0][::15], MHIMS[1][::15], marker="o",  label="MHIMS " + labels[i], ec = colors[i], fc = 'none'
+        MHIMS[0][::15],
+        MHIMS[1][::15],
+        marker="o",
+        label="MHIMS " + labels[i],
+        ec=colors[i],
+        fc="none",
     )
 
     MHIMS_interp = interpolate.interp1d(MHIMS[0], MHIMS[1])

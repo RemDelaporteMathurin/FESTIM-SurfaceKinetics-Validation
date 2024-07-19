@@ -19,7 +19,7 @@ P_D2 = 1  # Pa
 T_load = 370  # D loading temperature, K
 T_storage = 290  # temperature after cooling phase, K
 ramp = 3 / 60  # TDS heating rate, K/s
-#t_load = 143 * 3600  # exposure duration, s
+# t_load = 143 * 3600  # exposure duration, s
 t_cool = 1000  # colling duration, s
 t_storage = 24 * 3600  # storage time, s
 t_TDS = (800 - T_storage) / ramp  # TDS duration (up to 800 K), s
@@ -31,7 +31,7 @@ A = 12e-3 * 15e-3  # surface area, m^2
 
 # EUROFER properties
 rho_EFe = 8.59e28  # EUROFER atomic concentration, m^-3
-n_IS = 6*rho_EFe  # concentration of interstitial sites, m^-3
+n_IS = 6 * rho_EFe  # concentration of interstitial sites, m^-3
 n_surf = rho_EFe ** (2 / 3)  # concentration of adsorption sites, m^-2
 lambda_lat = rho_EFe ** (-1 / 3)  # Typical lattice spacing, m
 
@@ -40,21 +40,23 @@ E_diff = 0.15  # diffusion activation energy, eV
 
 # Energy landscape
 E_bs = E_diff  # energy barrier from bulk to surface transition, eV
-nu_bs = D0/lambda_lat**2  # attempt frequency for b-to-s transition, s^-1
+nu_bs = D0 / lambda_lat**2  # attempt frequency for b-to-s transition, s^-1
 E_diss = 0.4  # energy barrier for D2 dissociation, eV
 E_rec = 0.7  # energy barrier for D2 recombination, eV
 E_sol = 0.238  # heat of solution, eV
 S0 = 1.5e-6
 Xi0 = 1e-4
 chi0 = 1e-6
-E_sb = E_rec/2 - E_diss/2 + 0.238 + E_diff  # energy barrier from bulk to surface transition, eV
+E_sb = (
+    E_rec / 2 - E_diss / 2 + 0.238 + E_diff
+)  # energy barrier from bulk to surface transition, eV
 
 # Trap properties
-nu_tr = D0/lambda_lat**2  # trapping attempt frequency, s^-1
+nu_tr = D0 / lambda_lat**2  # trapping attempt frequency, s^-1
 nu_dt = 2.0e13  # detrapping attempt frequency, s^-1
 E_tr = E_diff
 E_dt_intr = 0.9  # detrapping energy for intrinsic traps, eV
-E_dt_dpa = 1.1 # detrapping energy for DPA traps, eV
+E_dt_dpa = 1.1  # detrapping energy for DPA traps, eV
 
 # Implantation parameters
 Gamma = 9e19  # irradiation flux, m^-2 s^-1
@@ -63,6 +65,7 @@ R = 4.0e-10  # implantation range, m
 sigma = 1 / np.sqrt(2 * 1.77778e6) * 1e-6
 
 r = 0.612  # reflection coefficient
+
 
 ################### FUNCTIONS ###################
 def Xi(T):
@@ -99,13 +102,14 @@ def norm_flux(X, sigma):
         + special.erf((X) / np.sqrt(2) / sigma)
     )
 
+
 ################### MODEL ###################
 def run_simulation(t_load, is_dpa):
 
     def J_vs(T, surf_conc, t):
 
-        tt = 0.002 * (t-t_load)
-        cond = 0.5 - 0.5 * (f.exp(2*tt) - 1) / (f.exp(2*tt) + 1)
+        tt = 0.002 * (t - t_load)
+        cond = 0.5 - 0.5 * (f.exp(2 * tt) - 1) / (f.exp(2 * tt) + 1)
 
         J_diss = (
             2 * P_D2 * Xi(T) * (1 - surf_conc / n_surf) ** 2 * Psi(T)
@@ -114,9 +118,11 @@ def run_simulation(t_load, is_dpa):
         J_rec = 2 * chi(T) * surf_conc**2  # recombination flux
 
         Omega_loss = 8e4
-        J_loss = (surf_conc / n_surf) * Omega_loss * Gamma * (1-r)  # ad hoc flux for fit
+        J_loss = (
+            (surf_conc / n_surf) * Omega_loss * Gamma * (1 - r)
+        )  # ad hoc flux for fit
 
-        J_net =  (J_diss - J_loss) * cond - J_rec
+        J_net = (J_diss - J_loss) * cond - J_rec
         return J_net
 
     EFe_model = F.Simulation(log_level=40)
@@ -139,7 +145,7 @@ def run_simulation(t_load, is_dpa):
         k_bs=k_bs,
         lambda_IS=lambda_lat,
         n_surf=n_surf,
-        n_IS=4*rho_EFe,
+        n_IS=4 * rho_EFe,
         J_vs=J_vs,
         surfaces=[1, 2],
         initial_condition=0,
@@ -148,9 +154,8 @@ def run_simulation(t_load, is_dpa):
 
     EFe_model.boundary_conditions = [surf_conc1]
 
-
     trap_intr = F.Trap(
-        k_0=nu_tr/n_IS,
+        k_0=nu_tr / n_IS,
         E_k=E_tr,
         p_0=nu_dt,
         E_p=E_dt_intr,
@@ -158,25 +163,31 @@ def run_simulation(t_load, is_dpa):
         materials=EFe_model.materials[0],
     )
     trap_dpa = F.Trap(
-        k_0=nu_tr/n_IS,
+        k_0=nu_tr / n_IS,
         E_k=E_tr,
         p_0=nu_dt,
         E_p=E_dt_dpa,
-        #density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3.3e-6), (0, True)),
-        #density=0.25e-3 * rho_EFe * (1/(1 + sp.exp((F.x-3e-6)*5e6))),
-        density = (2.5e-4 + (1e-12-2.5E-4)*(0.5+0.5*sp.tanh(100e6*(F.x-3.3e-6))))*rho_EFe,
-        materials=EFe_model.materials[0],
+        # density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3.3e-6), (0, True)),
+        # density=0.25e-3 * rho_EFe * (1/(1 + sp.exp((F.x-3e-6)*5e6))),
+        density=(
+            2.5e-4 + (1e-12 - 2.5e-4) * (0.5 + 0.5 * sp.tanh(100e6 * (F.x - 3.3e-6)))
         )
+        * rho_EFe,
+        materials=EFe_model.materials[0],
+    )
 
     EFe_model.traps = [trap_intr]
     if is_dpa:
         EFe_model.traps = [trap_intr, trap_dpa]
 
-    #EFe_model.initial_conditions = [F.InitialCondition(field="1", value=1e-5*rho_EFe)]
+    # EFe_model.initial_conditions = [F.InitialCondition(field="1", value=1e-5*rho_EFe)]
 
     EFe_model.sources = [
         F.ImplantationFlux(
-            flux=Gamma * (1 - r) * norm_flux(R, sigma) * (0.5 - 0.5 * sp.tanh(0.002*(F.t-t_load))),
+            flux=Gamma
+            * (1 - r)
+            * norm_flux(R, sigma)
+            * (0.5 - 0.5 * sp.tanh(0.002 * (F.t - t_load))),
             imp_depth=R,
             width=sigma,
             volume=1,
@@ -185,24 +196,74 @@ def run_simulation(t_load, is_dpa):
 
     log_bis = sp.Function("std::log")
 
-    a1 = sp.cosh(3011 - 0.005*(F.t + (143*3600 - t_load)))
-    a2 = sp.cosh(3016 - 0.005*(F.t + (143*3600 - t_load)))
-    a3 = sp.cosh(3021.5 - 0.005*(F.t + (143*3600 - t_load)))
-    a4 = sp.cosh(3036.5 - 0.005*(F.t + (143*3600 - t_load)))
-    a5 = sp.cosh(3063.5 - 0.005*(F.t + (143*3600 - t_load)))
-    fun = 543.708 + 0.339015*log_bis(a1) + 3.66105*log_bis(a2) + 1.99939 * log_bis(a3) - 0.806*log_bis(a4)- 5.194 * log_bis(a5)
+    a1 = sp.cosh(3011 - 0.005 * (F.t + (143 * 3600 - t_load)))
+    a2 = sp.cosh(3016 - 0.005 * (F.t + (143 * 3600 - t_load)))
+    a3 = sp.cosh(3021.5 - 0.005 * (F.t + (143 * 3600 - t_load)))
+    a4 = sp.cosh(3036.5 - 0.005 * (F.t + (143 * 3600 - t_load)))
+    a5 = sp.cosh(3063.5 - 0.005 * (F.t + (143 * 3600 - t_load)))
+    fun = (
+        543.708
+        + 0.339015 * log_bis(a1)
+        + 3.66105 * log_bis(a2)
+        + 1.99939 * log_bis(a3)
+        - 0.806 * log_bis(a4)
+        - 5.194 * log_bis(a5)
+    )
 
-    a1 = log_bis(sp.cosh(0.005*(-612700+F.t)))
-    a2 = log_bis(sp.cosh(0.005*(-607300+F.t))) 
-    a3 = log_bis(sp.cosh(0.005*(-603200+F.t))) 
-    a4 = log_bis(sp.cosh(0.005*(-603200+F.t)))
-    a5 = log_bis(sp.cosh(0.005*(-602200+F.t)))
+    a1 = log_bis(sp.cosh(0.005 * (-612700 + F.t)))
+    a2 = log_bis(sp.cosh(0.005 * (-607300 + F.t)))
+    a3 = log_bis(sp.cosh(0.005 * (-603200 + F.t)))
+    a4 = log_bis(sp.cosh(0.005 * (-603200 + F.t)))
+    a5 = log_bis(sp.cosh(0.005 * (-602200 + F.t)))
 
-    fun = (293.55 + 50 * (0-0.05194*a1+0.05194*(-3035.806852819440-(3035.806852819440+a1)+2*(3062.806852819440+a2))) 
-        + 50 * (0-0.06*a2+0.06*(-3020.806852819440-(3020.806852819440+a2)+2*(3035.806852819440+a3)))
-        + 50 * (0-0.04*a3+0.04*(-3015.306852819440-(3015.306852819440+a3)+2.00003*(3020.806852819440+a4)))
-        + 50 * (0-0.00339*a4+0.00339*(-3010.30685-(3010.306852819440+a4)+2.00009*(3015.306852819440+a5)))
-        + 76.45*0.5*(1-sp.tanh(0.002*(F.t-515800))))
+    fun = (
+        293.55
+        + 50
+        * (
+            0
+            - 0.05194 * a1
+            + 0.05194
+            * (
+                -3035.806852819440
+                - (3035.806852819440 + a1)
+                + 2 * (3062.806852819440 + a2)
+            )
+        )
+        + 50
+        * (
+            0
+            - 0.06 * a2
+            + 0.06
+            * (
+                -3020.806852819440
+                - (3020.806852819440 + a2)
+                + 2 * (3035.806852819440 + a3)
+            )
+        )
+        + 50
+        * (
+            0
+            - 0.04 * a3
+            + 0.04
+            * (
+                -3015.306852819440
+                - (3015.306852819440 + a3)
+                + 2.00003 * (3020.806852819440 + a4)
+            )
+        )
+        + 50
+        * (
+            0
+            - 0.00339 * a4
+            + 0.00339
+            * (
+                -3010.30685
+                - (3010.306852819440 + a4)
+                + 2.00009 * (3015.306852819440 + a5)
+            )
+        )
+        + 76.45 * 0.5 * (1 - sp.tanh(0.002 * (F.t - 515800)))
+    )
 
     EFe_model.T = F.Temperature(
         value=sp.Piecewise(
@@ -213,7 +274,6 @@ def run_simulation(t_load, is_dpa):
         )
     )
 
-
     def step_size(t):
         if t <= t_load:
             return 500
@@ -221,7 +281,6 @@ def run_simulation(t_load, is_dpa):
             return 1000
         else:
             return 40
-
 
     EFe_model.dt = F.Stepsize(
         initial_value=1e-4,
@@ -243,14 +302,13 @@ def run_simulation(t_load, is_dpa):
     )
 
     derived_quantities = F.DerivedQuantities(
-                [
-                    F.AdsorbedHydrogen(surface=1),
-                    F.AdsorbedHydrogen(surface=2),
-                    F.TotalSurface(field="T", surface=1),
-                    F.TotalVolume(field="retention", volume=1)
-                ],
-            )
-    
+        [
+            F.AdsorbedHydrogen(surface=1),
+            F.AdsorbedHydrogen(surface=2),
+            F.TotalSurface(field="T", surface=1),
+            F.TotalVolume(field="retention", volume=1),
+        ],
+    )
 
     EFe_model.exports = [derived_quantities]
 
@@ -259,25 +317,14 @@ def run_simulation(t_load, is_dpa):
 
     return derived_quantities
 
+
 params = {
-    0: {
-        "t_load": 143*3600,
-        "is_dpa": False,
-        "exp_data": "143hplasma"
-    },
-    1: {
-        "t_load": 48*3600,
-        "is_dpa": True,
-        "exp_data": "DPA+48hplasma"
-    },
-    2: {
-        "t_load": 143*3600,
-        "is_dpa": True,
-        "exp_data": "DPA+143hplasma"
-    },
+    0: {"t_load": 143 * 3600, "is_dpa": False, "exp_data": "143hplasma"},
+    1: {"t_load": 48 * 3600, "is_dpa": True, "exp_data": "DPA+48hplasma"},
+    2: {"t_load": 143 * 3600, "is_dpa": True, "exp_data": "DPA+143hplasma"},
 }
 
-fig, ax = plt.subplots(1, 3, figsize=(15,4.5))
+fig, ax = plt.subplots(1, 3, figsize=(15, 4.5))
 
 for i in range(3):
 
@@ -289,7 +336,7 @@ for i in range(3):
     retention = np.array(results[3].data)
     t = np.array(results.t)
 
-    t_load=params[i]["t_load"]
+    t_load = params[i]["t_load"]
     exp_label = params[i]["exp_data"]
 
     Flux_left = surf_conc1**2 * chi0 * np.exp(-E_rec / F.k_B / T)
@@ -297,20 +344,31 @@ for i in range(3):
 
     exp = pd.read_csv(f"./exp_data/{exp_label}.csv", header=None, skiprows=1, sep=",")
 
-    a1 = np.cosh(3011 - 0.005*(t + (143*3600 - t_load)))
-    a2 = np.cosh(3016 - 0.005*(t + (143*3600 - t_load)))
-    a3 = np.cosh(3021.5 - 0.005*(t + (143*3600 - t_load)))
-    a4 = np.cosh(3036.5 - 0.005*(t + (143*3600 - t_load)))
-    a5 = np.cosh(3063.5 - 0.005*(t + (143*3600 - t_load)))
-    T_exp = 543.708 + 0.339015*np.log(a1) + 3.66105*np.log(a2) + 1.99939 * np.log(a3) - 0.806*np.log(a4)- 5.194 * np.log(a5)
+    a1 = np.cosh(3011 - 0.005 * (t + (143 * 3600 - t_load)))
+    a2 = np.cosh(3016 - 0.005 * (t + (143 * 3600 - t_load)))
+    a3 = np.cosh(3021.5 - 0.005 * (t + (143 * 3600 - t_load)))
+    a4 = np.cosh(3036.5 - 0.005 * (t + (143 * 3600 - t_load)))
+    a5 = np.cosh(3063.5 - 0.005 * (t + (143 * 3600 - t_load)))
+    T_exp = (
+        543.708
+        + 0.339015 * np.log(a1)
+        + 3.66105 * np.log(a2)
+        + 1.99939 * np.log(a3)
+        - 0.806 * np.log(a4)
+        - 5.194 * np.log(a5)
+    )
 
-     
-    ax[i].plot(T_exp, Flux_left / 1e17, label = 'Flux_left')
-    ax[i].plot(T_exp, Flux_right / 1e17, label = 'Flux_right')
-    ax[i].plot(T_exp, (Flux_left+Flux_right) / 1e17, label = 'Total flux')
+    ax[i].plot(T_exp, Flux_left / 1e17, label="Flux_left")
+    ax[i].plot(T_exp, Flux_right / 1e17, label="Flux_right")
+    ax[i].plot(T_exp, (Flux_left + Flux_right) / 1e17, label="Total flux")
 
     ax[i].scatter(
-        exp[0], exp[1]/ 1e5 , marker="x", s=75, linewidths=1.2, label=f"exp.: {exp_label}"
+        exp[0],
+        exp[1] / 1e5,
+        marker="x",
+        s=75,
+        linewidths=1.2,
+        label=f"exp.: {exp_label}",
     )
 
     ax[i].set_xlim(300, 800)

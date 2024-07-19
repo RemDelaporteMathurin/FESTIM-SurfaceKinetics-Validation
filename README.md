@@ -8,7 +8,7 @@ This repository contains scripts for V&V of surface kinetics model implemented i
 
 The repository includes several validation cases and one verification test on the MMS basis.
 
-[1] [H absorption in Ti](./H_Ti): The case reproduces simulation results of [Y. Hamamoto et al.](https://www.sciencedirect.com/science/article/pii/S2352179120300272) on the H absorption in Ti. The simulations are based on experiments performed by [Y. Harooka et al.](https://www.sciencedirect.com/science/article/abs/pii/0022311581905663?via%3Dihub)
+[1] [H absorption in Ti](./H_Ti): The case reproduces simulation results of [Y. Shimohata et al.](https://www.sciencedirect.com/science/article/pii/S0920379621006098) on the H absorption in Ti. The simulations are based on experiments performed by [Y. Harooka et al.](https://www.sciencedirect.com/science/article/abs/pii/0022311581905663?via%3Dihub)
 
 [2] [D adsorption on oxidised W](./D_WO): The case reproduces simulation results of [E. A. Hodille et al.](https://iopscience.iop.org/article/10.1088/1741-4326/ad2a29) on the D adsorption/desorption on/from oxidised W. The simulations are based on experiments performed by [A. Dunand et al.](https://iopscience.iop.org/article/10.1088/1741-4326/ac583a)
 

@@ -148,7 +148,7 @@ EFe_model.boundary_conditions = [surf_conc1]
 
 
 trap_intr = F.Trap(
-    k_0=nu_tr/n_IS,
+    k_0=nu_tr / n_IS,
     E_k=E_tr,
     p_0=nu_dt,
     E_p=E_dt_intr,
@@ -156,18 +156,18 @@ trap_intr = F.Trap(
     materials=EFe_model.materials[0],
 )
 trap_dpa = F.Trap(
-    k_0=nu_tr/n_IS,
+    k_0=nu_tr / n_IS,
     E_k=E_tr,
     p_0=nu_dt,
     E_p=E_dt_dpa,
-    #density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3.3e-6), (0, True)),
-    density=0.25e-3 * rho_EFe * (1/(1 + sp.exp((F.x-3e-6)*5e6))),
+    # density=sp.Piecewise((0.25e-3 * rho_EFe, F.x <= 3.3e-6), (0, True)),
+    density=0.25e-3 * rho_EFe * (1 / (1 + sp.exp((F.x - 3e-6) * 5e6))),
     materials=EFe_model.materials[0],
-    )
+)
 
 EFe_model.traps = F.Traps([trap_intr])
 
-#EFe_model.initial_conditions = [F.InitialCondition(field="1", value=1e-5*rho_EFe)]
+# EFe_model.initial_conditions = [F.InitialCondition(field="1", value=1e-5*rho_EFe)]
 
 EFe_model.sources = [
     F.ImplantationFlux(
@@ -311,7 +311,7 @@ ax4.plot(
 )
 
 ax4.scatter(
-    exp[0], exp[1]/ 1e5 , marker="x", s=75, linewidths=1.2, label="exp.: 143h plasma"
+    exp[0], exp[1] / 1e5, marker="x", s=75, linewidths=1.2, label="exp.: 143h plasma"
 )
 ax4.legend()
 

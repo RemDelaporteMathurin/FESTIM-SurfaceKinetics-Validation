@@ -58,13 +58,9 @@ def J_vs(T, surf_conc, t):
 
     phi_exc = G_atom * sigma_exc * surf_conc
 
-    phi_des = (
-        2
-        * nu0
-        * (lambda_des * surf_conc) ** 2
-        * f.exp(-2 * E_des / F.k_B / T)
-    )
+    phi_des = 2 * nu0 * (lambda_des * surf_conc) ** 2 * f.exp(-2 * E_des / F.k_B / T)
     return phi_atom - phi_exc - phi_des
+
 
 W_model = F.Simulation(log_level=40)
 
@@ -83,11 +79,11 @@ W_model.mesh = F.MeshFromVertices(np.sort(vertices))
 tungsten = F.Material(id=1, D_0=D0, E_D=E_diff)
 W_model.materials = tungsten
 
-'''distr = sp.Piecewise(
+"""distr = sp.Piecewise(
     (1, F.x <= 2.2e-6),
     (1 - (F.x - 2.2e-6)/0.2e-6, F.x <= 2.4e-6),
     (0, True)
-    )'''
+    )"""
 distr = 1 / (1 + sp.exp((F.x - 2.2e-6) / 2.5e-8))
 traps = F.Traps(
     [
@@ -112,7 +108,7 @@ traps = F.Traps(
             E_k=E_diff,
             p_0=nu0,
             E_p=1.65,
-            density=0.19e-2*rho_W*distr,
+            density=0.19e-2 * rho_W * distr,
             materials=tungsten,
         ),
         F.Trap(
@@ -120,7 +116,7 @@ traps = F.Traps(
             E_k=E_diff,
             p_0=nu0,
             E_p=1.85,
-            density=0.16e-2*rho_W*distr,
+            density=0.16e-2 * rho_W * distr,
             materials=tungsten,
         ),
         F.Trap(
@@ -128,7 +124,7 @@ traps = F.Traps(
             E_k=E_diff,
             p_0=nu0,
             E_p=2.06,
-            density=0.02e-2*rho_W*distr,
+            density=0.02e-2 * rho_W * distr,
             materials=tungsten,
         ),
     ]
@@ -156,7 +152,6 @@ W_model.dt = F.Stepsize(
     stepsize_change_ratio=1.2,
     max_stepsize=1000,
     dt_min=1e-6,
-
 )
 
 W_model.settings = F.Settings(
@@ -186,41 +181,50 @@ W_model.exports = [derived_quantities]
 W_model.initialise()
 W_model.run()
 
-retention = np.array(derived_quantities[0].data)+np.array(derived_quantities[1].data)
+retention = np.array(derived_quantities[0].data) + np.array(derived_quantities[1].data)
 t = np.array(derived_quantities.t)
 
-plt.plot(t/3600, retention, label = "FESTIM")
+plt.plot(t / 3600, retention, label="FESTIM")
 
-plt.plot(t/3600, np.array(derived_quantities[4].data), label = "Trap 3")
-plt.plot(t/3600, np.array(derived_quantities[5].data), label = "Trap 4")
-plt.plot(t/3600, np.array(derived_quantities[6].data), label = "Trap 5")
-plt.plot(t/3600, np.array(derived_quantities[1].data), label = "Surf. conc.")
+plt.plot(t / 3600, np.array(derived_quantities[4].data), label="Trap 3")
+plt.plot(t / 3600, np.array(derived_quantities[5].data), label="Trap 4")
+plt.plot(t / 3600, np.array(derived_quantities[6].data), label="Trap 5")
+plt.plot(t / 3600, np.array(derived_quantities[1].data), label="Surf. conc.")
 
-#plt.plot(t/3600, np.array(derived_quantities[1].data))
+# plt.plot(t/3600, np.array(derived_quantities[1].data))
 
 exp = pd.read_csv("./exp_data.csv", header=None, skiprows=1, sep=",")
 
-plt.scatter(exp[0], exp[1]*1e19, marker="^", s=75, ec = "black", fc = "none", linewidths=1.2, label="exp.")
+plt.scatter(
+    exp[0],
+    exp[1] * 1e19,
+    marker="^",
+    s=75,
+    ec="black",
+    fc="none",
+    linewidths=1.2,
+    label="exp.",
+)
 
 exp = pd.read_csv("./MHIMS.csv", header=None, skiprows=1, sep=",")
 
-plt.plot(exp[0]*2, exp[1]*1e19, color='black', ls='dashed', label="MHIMS")
+plt.plot(exp[0] * 2, exp[1] * 1e19, color="black", ls="dashed", label="MHIMS")
 
 exp = pd.read_csv("./3.csv", header=None, skiprows=1, sep=",")
 
-plt.plot(exp[0], exp[1]*1e19, color='tab:green', ls='dashed', label="Trap 3")
+plt.plot(exp[0], exp[1] * 1e19, color="tab:green", ls="dashed", label="Trap 3")
 
 exp = pd.read_csv("./4.csv", header=None, skiprows=1, sep=",")
 
-plt.plot(exp[0], exp[1]*1e19, color='tab:blue', ls='dashed', label="Trap 4")
+plt.plot(exp[0], exp[1] * 1e19, color="tab:blue", ls="dashed", label="Trap 4")
 
 exp = pd.read_csv("./5.csv", header=None, skiprows=1, sep=",")
 
-plt.plot(exp[0], exp[1]*1e19, color='tab:red', ls='dashed', label="Trap 5")
+plt.plot(exp[0], exp[1] * 1e19, color="tab:red", ls="dashed", label="Trap 5")
 
 exp = pd.read_csv("./cs.csv", header=None, skiprows=1, sep=",")
 
-plt.plot(exp[0], exp[1]*1e19, color='violet', ls='dashed', label="Surf. conc.")
+plt.plot(exp[0], exp[1] * 1e19, color="violet", ls="dashed", label="Surf. conc.")
 
 plt.xlabel(r"$t$, h")
 plt.ylabel(r"D amount, m$^{-2}$")
