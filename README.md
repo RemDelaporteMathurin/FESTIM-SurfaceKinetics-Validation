@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains scripts for V&V of surface kinetics model implemented in FESTIM.
+This repository contains scripts for V&V of the kinetic surface model implemented in FESTIM.
 
 ## Cases
 
