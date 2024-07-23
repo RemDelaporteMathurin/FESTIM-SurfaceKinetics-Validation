@@ -53,10 +53,10 @@ E_sb = (
 
 # Trap properties
 nu_tr = D0 / lambda_lat**2  # trapping attempt frequency, s^-1
-nu_dt = 2.0e13  # detrapping attempt frequency, s^-1
+nu_dt = 4.0e13  # detrapping attempt frequency, s^-1
 E_tr = E_diff
 E_dt_intr = 0.9  # detrapping energy for intrinsic traps, eV
-E_dt_dpa = 1.1  # detrapping energy for DPA traps, eV
+E_dt_dpa = 1.08  # detrapping energy for DPA traps, eV
 
 # Implantation parameters
 Gamma = 9e19  # irradiation flux, m^-2 s^-1
@@ -196,20 +196,7 @@ def run_simulation(t_load, is_dpa):
 
     log_bis = sp.Function("std::log")
 
-    a1 = sp.cosh(3011 - 0.005 * (F.t + (143 * 3600 - t_load)))
-    a2 = sp.cosh(3016 - 0.005 * (F.t + (143 * 3600 - t_load)))
-    a3 = sp.cosh(3021.5 - 0.005 * (F.t + (143 * 3600 - t_load)))
-    a4 = sp.cosh(3036.5 - 0.005 * (F.t + (143 * 3600 - t_load)))
-    a5 = sp.cosh(3063.5 - 0.005 * (F.t + (143 * 3600 - t_load)))
-    fun = (
-        543.708
-        + 0.339015 * log_bis(a1)
-        + 3.66105 * log_bis(a2)
-        + 1.99939 * log_bis(a3)
-        - 0.806 * log_bis(a4)
-        - 5.194 * log_bis(a5)
-    )
-
+    # only valid for the 143h plasma cases
     a1 = log_bis(sp.cosh(0.005 * (-612700 + F.t)))
     a2 = log_bis(sp.cosh(0.005 * (-607300 + F.t)))
     a3 = log_bis(sp.cosh(0.005 * (-603200 + F.t)))
@@ -265,11 +252,21 @@ def run_simulation(t_load, is_dpa):
         + 76.45 * 0.5 * (1 - sp.tanh(0.002 * (F.t - 515800)))
     )
 
+    # Monkey patch the C99CodePrinter class
+    from sympy.printing.c import C99CodePrinter
+
+    original_print_function = C99CodePrinter._print_Function
+
+    def _custom_print_Function(self, expr):
+        if expr.func == log_bis:
+            return f"std::log({self._print(expr.args[0])})"
+        return original_print_function(self, expr)
+
+    C99CodePrinter._print_Function = _custom_print_Function
+
     EFe_model.T = F.Temperature(
         value=sp.Piecewise(
             (T_load, F.t <= t_load),
-            (T_load - cooling_rate * (F.t - t_load), F.t <= t_load + t_cool),
-            (T_storage, F.t <= t_load + t_cool + t_storage),
             (fun, True),
         )
     )
@@ -320,15 +317,16 @@ def run_simulation(t_load, is_dpa):
 
 params = {
     0: {"t_load": 143 * 3600, "is_dpa": False, "exp_data": "143hplasma"},
-    1: {"t_load": 48 * 3600, "is_dpa": True, "exp_data": "DPA+48hplasma"},
+    # 1: {"t_load": 48 * 3600, "is_dpa": True, "exp_data": "DPA+48hplasma"},
     2: {"t_load": 143 * 3600, "is_dpa": True, "exp_data": "DPA+143hplasma"},
 }
 
 fig, ax = plt.subplots(1, 3, figsize=(15, 4.5))
 
-for i in range(3):
 
-    results = run_simulation(t_load=params[i]["t_load"], is_dpa=params[i]["is_dpa"])
+for i, prms in params.items():
+
+    results = run_simulation(t_load=prms["t_load"], is_dpa=prms["is_dpa"])
 
     surf_conc1 = np.array(results[0].data)
     surf_conc2 = np.array(results[1].data)
@@ -336,11 +334,11 @@ for i in range(3):
     retention = np.array(results[3].data)
     t = np.array(results.t)
 
-    t_load = params[i]["t_load"]
-    exp_label = params[i]["exp_data"]
+    t_load = prms["t_load"]
+    exp_label = prms["exp_data"]
 
-    Flux_left = surf_conc1**2 * chi0 * np.exp(-E_rec / F.k_B / T)
-    Flux_right = surf_conc2**2 * chi0 * np.exp(-E_rec / F.k_B / T)
+    Flux_left = 2 * surf_conc1**2 * chi0 * np.exp(-E_rec / F.k_B / T)
+    Flux_right = 2 * surf_conc2**2 * chi0 * np.exp(-E_rec / F.k_B / T)
 
     exp = pd.read_csv(f"./exp_data/{exp_label}.csv", header=None, skiprows=1, sep=",")
 
